@@ -13,23 +13,11 @@
     // device APIs are available
     //
     function onDeviceReady() {
-        window.localStorage.setItem("key", "value");
-
 
     }
 
-    function win(writer) {
 
-	var text = document.getElementById("inputBox").value;
-        
-	//writer.seek(writer.length);
-    	writer.write(text);
-    };
-
-    var fail = function(evt) {
-     	console.log(error.code);
-    };
-
+//Regular Write Code
 
     function writeFile() {
 	alert("Write File");
@@ -65,13 +53,42 @@
         alert("File Error:" + error.code);
     }
 
+//Append Code
 
+    function appendFile() {
+        window.requestFileSystem(LocalFileSystem.PERSISTENT, 0, gotFSAppend, fail);
+
+    }
+
+    function gotFSAppend(fileSystem) {
+	var filename = document.getElementById("fileNameBox").value;
+        fileSystem.root.getFile(filename, {create: true, exclusive: false}, gotFileEntryAppend, fail);
+    }
+
+    function gotFileEntryAppend(fileEntry) {
+        fileEntry.createWriter(gotFileWriterAppend, fail);
+    }
+
+    function gotFileWriterAppend(writer) {
+
+	var text = document.getElementById("inputBox").value;
+	writer.onwriteend = function(evt) {
+		
+	    document.getElementById("output").innerHTML = "File append Complete!";
+	};
+
+	writer.seek(writer.length);
+        writer.write(text);
+
+    }
+
+
+
+
+//Read and Show Code
 
     function showFileText() {
-
 	window.requestFileSystem(LocalFileSystem.PERSISTENT, 0, gotFSRead, fail);
-
-
     }
 
     function gotFSRead(fileSystem) {
@@ -111,6 +128,7 @@
 		Text to Write to File: <input type="text" id="inputBox">
 	</form>
         <button onclick="writeFile();">Save text to file</button>
+        <button onclick="appendFile();">Append to file</button>
         <button onclick="showFileText();">Read and Show File</button>
 	<br>
 
